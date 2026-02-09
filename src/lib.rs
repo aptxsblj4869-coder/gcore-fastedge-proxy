@@ -1,18 +1,18 @@
-use fastedge::{Body, Request, Response, Result};
+use fastedge::{Body, Result};
+// 使用 Gcore 编译器推荐的直接导入路径
+use fastedge::http::{Request, Response};
 
-#[fastedge::http_handler]
+#[no_mangle]
 pub fn main(req: Request<Body>) -> Result<Response<Body>> {
-    // 检查 WebSocket 升级
-    let is_ws = req.headers()
-        .get("upgrade")
-        .map_with_if(|v| v == "websocket", || false);
-
-    if is_ws {
-        return Ok(Response::builder()
-            .status(101)
-            .header("Connection", "Upgrade")
-            .header("Upgrade", "websocket")
-            .body(Body::empty())?);
+    // 检查 WebSocket
+    if let Some(upgrade) = req.headers().get("upgrade") {
+        if upgrade == "websocket" {
+            return Ok(Response::builder()
+                .status(101)
+                .header("Connection", "Upgrade")
+                .header("Upgrade", "websocket")
+                .body(Body::empty())?);
+        }
     }
 
     Ok(Response::builder()
