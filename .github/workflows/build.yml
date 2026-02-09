@@ -1,0 +1,18 @@
+name: Build-Wasm
+on: [push, workflow_dispatch]
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Install Rust
+        run: |
+          rustup target add wasm32-wasi
+          rustup toolchain install stable
+      - name: Build
+        run: cargo build --target wasm32-wasi --release
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: gcore-binary
+          path: target/wasm32-wasi/release/*.wasm
