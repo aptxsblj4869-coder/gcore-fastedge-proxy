@@ -1,12 +1,10 @@
-use fastedge::{Body, Result};
-// 使用 Gcore 编译器推荐的直接导入路径
-use fastedge::http::{Request, Response};
+use fastedge::http::{Request, Response, Body};
 
-#[no_mangle]
-pub fn main(req: Request<Body>) -> Result<Response<Body>> {
-    // 检查 WebSocket
-    if let Some(upgrade) = req.headers().get("upgrade") {
-        if upgrade == "websocket" {
+#[fastedge::http_handler]
+pub fn main(req: Request<Body>) -> std::result::Result<Response<Body>, Box<dyn std::error::Error>> {
+    // 检查是否为 WebSocket
+    if let Some(v) = req.headers().get("upgrade") {
+        if v == "websocket" {
             return Ok(Response::builder()
                 .status(101)
                 .header("Connection", "Upgrade")
